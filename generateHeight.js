@@ -36,6 +36,11 @@ function generateHeight(width, height, sameSeed, customSeed) {
 	if (global.Terrain_Formation == 'Default') {
 		console.log('Terrain Formation: Default')
 
+		if (global.gui_controller != undefined) {
+			global.gui_controller.Max_Height_Distribution = 1.5;
+			global.gui_controller.Max_Noise_Quality = 5;
+		}
+
 		for (var j = 0; j < 4; j++) {
 	
 			if (j === 0) for (var i = 0; i < size; i++) data[i] = 0;
@@ -47,7 +52,7 @@ function generateHeight(width, height, sameSeed, customSeed) {
         
         data[i] += 1 * (perlin.noise(x / currentNoiseQuality, y / currentNoiseQuality, z) * currentNoiseQuality)
                 + 0.5 * (perlin.noise(x / (currentNoiseQuality * 2), y / (currentNoiseQuality * 2), z) * (currentNoiseQuality * 2))
-                + 0.25 * (perlin.noise(x / (currentNoiseQuality * 4), y / (currentNoiseQuality * 4), z) * (currentNoiseQuality * 2));
+								+ 0.25 * (perlin.noise(x / (currentNoiseQuality * 4), y / (currentNoiseQuality * 4), z) * (currentNoiseQuality * 4))
 			}
 	
 			currentNoiseQuality *= 4;
@@ -55,6 +60,12 @@ function generateHeight(width, height, sameSeed, customSeed) {
 	} else 
 	if (global.Terrain_Formation == 'Islands') {
 		console.log('Terrain Formation: Islands')
+
+		if (global.gui_controller != undefined) {
+			console.log('fuck this')
+			global.gui_controller.Max_Height_Distribution = 1;
+			global.gui_controller.Max_Noise_Quality = 2.5;
+		}
 
 		for (var j = 0; j < 4; j++) {
 	
@@ -90,22 +101,14 @@ function generateHeight(width, height, sameSeed, customSeed) {
 		}
 	} else 
 
-	if (global.Terrain_Formation == 'Water') {
-		console.log('Terrain Formation: Water');
-
-		let index = 0;
-		for (let x = 0; x < global.worldDepth; x++) {
-			for (let z = 0; z < global.worldWidth; z++) {
-				data[index] = -100;
-
-				index++;
-			}
-		}
-	} else
-
 	if (global.Terrain_Formation == 'Mountains') {
 		console.log('Terrain Formation: Mountains');
 		
+		if (global.gui_controller != undefined) {
+			global.gui_controller.Max_Height_Distribution = 0.5;
+			global.gui_controller.Max_Noise_Quality = 1;
+		}
+
 		for (var j = 0; j < 4; j++) {
 	
 			if (j === 0) for (var i = 0; i < size; i++) data[i] = 0;

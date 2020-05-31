@@ -7,9 +7,9 @@ document.onkeydown = function (evt) {   // open/close welcome screen when escape
   evt = evt || window.event;
   if (evt.keyCode == 27) {
     if (document.getElementById('startingScreen').style.display == "none") {
-      document.getElementById('startingScreen').style.display = "block"
+      document.getElementById('startingScreen').style.display = "block";
     } else {
-      document.getElementById('startingScreen').style.display = "none"
+      document.getElementById('startingScreen').style.display = "none";
     }
   }
 };
