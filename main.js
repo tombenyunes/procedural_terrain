@@ -25,10 +25,10 @@ var DirectionalLight_Color = "#fff000";
 var Terrain_Formation = 'Default';
 
 var heightMult = 0.35;
+var noiseQuality = 2;
 
 var VoxelDestruction = false;
 
-var noiseQuality = 2;
 var seed;
 var worldWidth = 384, worldDepth = 384;
 var worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
@@ -54,6 +54,9 @@ scene.background = new THREE.Color('black');
 controls = new OrbitControls(camera, renderer.domElement);
 controls.maxPolarAngle = Math.PI / 2.1;
 controls.maxDistance = 2000;
+controls.rotateSpeed = 0.5;
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
 
 // stats = new Stats();
 // container.appendChild(stats.dom);
@@ -83,7 +86,7 @@ function Terrain() {
 		this.waterLevel = -7;
 
 		// ensures that at least 500 blocks have been generated above water
-		if ((blocksSubmerged() >= (worldDepth * worldWidth) - 500) && (gui_controller != undefined) && (Terrain_Formation != 'Water')) {	// calculated separetly from grass/sand counts to ensure fastest regeneration if necessary
+		if ((blocksSubmerged() >= (worldDepth * worldWidth) - 500) && (gui_controller != undefined)) {	// calculated separetly from grass/sand counts to ensure fastest regeneration if necessary
 			gui_controller.Regenerate(false, false);
 			return;
 		}
@@ -100,9 +103,16 @@ function Terrain() {
 					this.grass_color = '#006400';
 					this.sand_color = '#FFFFE0';
 					this.water_color = '#000b64';
+
 					break;
 				case 'Islands':
-					this.sandLevel = -2;
+
+					if (((blocksSubmerged() >= (worldDepth * worldWidth) - 500) || (blocksSubmerged() <= (worldDepth * worldWidth) / 1.5)) && (gui_controller != undefined)) {
+						gui_controller.Regenerate(false, false);
+						return;
+					}
+
+					this.sandLevel = 0;
 	
 					this.grass_color = '#326e01';
 					this.sand_color = 'lightyellow';
@@ -114,6 +124,7 @@ function Terrain() {
 					this.grass_color = '#565953';
 					this.sand_color = '#2e2e2e';
 					this.water_color = '#000000';
+
 					break;
 				case 'Marsh':
 					this.sandLevel = -4;
@@ -169,13 +180,6 @@ function Terrain() {
 			refractionRatio: 0.5,
 			reflectivity: 0.3,
 			combine: THREE.AddOperation
-			// metalness: 0.3,
-			// roughness: 0.0,
-			// opacity: 1
-			// side: THREE.DoubleSide
-			// transparent: 1
-			// envMapIntensity: 5,
-			// premultipliedAlpha: true
 		});
 		
 		waterMesh_basic = new THREE.InstancedMesh(this.waterGeometry, this.waterMaterial, worldWidth * worldDepth);
@@ -241,15 +245,12 @@ function Terrain() {
 
 					} else
 					if (h <= this.waterLevel) {
-						waterMesh_advanced.position.set(z * 1 - worldDepth / 2 * 1, x * 1 - worldWidth / 2 * 1, this.waterLevel + 1);
-						waterMesh_advanced.updateMatrix();
-						waterGeometry_advanced_merged.merge(waterMesh_advanced.geometry, waterMesh_advanced.matrix);					
+						transform.position.set(z * 1 - worldDepth / 2 * 1, x * 1 - worldWidth / 2 * 1, this.waterLevel + 1);
+						transform.updateMatrix();
+						waterGeometry_advanced_merged.merge(waterGeometry_advanced, transform.matrix);					
 					}
 				}
 			}
-
-
-			
 		}
 
 		water = new Water(
@@ -294,7 +295,7 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 
 	console.log('Initializing GUI')
 
-	this.Regenerate = function(sameSeed, customSeed, terrainFormation) {
+	this.Regenerate = function(sameSeed, customSeed, refreshSeed) {
 
 		console.log('Regenerating Terrain')
 
@@ -370,9 +371,12 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 			}
 		}
 
-		data = generateHeight(worldWidth, worldDepth, sameSeed, customSeed);
-		console.log(seed)
-		console.log(gui_controller.Seed)
+		// if (!sameSeed) {
+			data = generateHeight(worldWidth, worldDepth, sameSeed, customSeed);
+		// } else
+		// if (refreshSeed) {
+		// 	data = generateHeight(worldWidth, worldDepth, refreshSeed, customSeed);
+		// }
 
 		if (!customSeed) {
 			seed = gH.newSeed.toFixed(20);
@@ -399,6 +403,9 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 		noiseQuality = 2;
 
 		gui_controller.Regenerate(true, false);
+
+		this.height_dist_controller.max(this.Max_Height_Distribution);
+		this.noise_quality_controller.max(this.Max_Noise_Quality);
 	}
 
 	this.Reset_Blocks_Colors = function() {
@@ -406,6 +413,7 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 
 		userDefinedColors = false;
 
+		grass_color_controller
 		gui_controller.Regenerate(true, false);
 	}
 
@@ -419,6 +427,7 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 	}
 
 	this.Download_Scene = function() {
+
 		download();
 	}
 
@@ -433,6 +442,8 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 	this.Voxel_Size = 1;
 	this.Height_Distribution = heightMult;
 	this.Noise_Quality = noiseQuality;
+	this.Max_Height_Distribution = 1.5;
+	this.Max_Noise_Quality = 8;
 	this.Seed = seed;
 	if (advancedWater) { this.Water_Type = 'Advanced' } else { this.Water_Type = 'Basic' };
 	this.Terrain_Formation = 'Default';
@@ -443,7 +454,7 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 
 
 	gui = new GUI();
-	gui.width = 300;
+	gui.width = 312;
 
 	gui.remember(this.countObj);
 	gui.remember(terrain);
@@ -465,7 +476,7 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 	world_width_controller = terrain_folder.add(this, 'World_Width', 32, 512).listen().name('Terrain Width');
 
 	world_width_controller.onFinishChange(function(value) {
-		worldWidth = Math.min(Math.max(parseInt(gui_controller.World_Width), 32), 512);
+		worldWidth = Math.min(Math.max(parseInt(value), 32), 512);
 		gui_controller.World_Width = worldWidth;
 
 		gui_controller.Regenerate(true, false);
@@ -474,30 +485,27 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 	world_depth_controller = terrain_folder.add(this, 'World_Depth', 32, 512).name('Terrain Depth');
 
 	world_depth_controller.onFinishChange(function(value) {
-		worldDepth = Math.min(Math.max(parseInt(gui_controller.World_Depth), 32), 512);
+		worldDepth = Math.min(Math.max(parseInt(value), 32), 512);
 		gui_controller.World_Depth = worldDepth;
 
 		gui_controller.Regenerate(true, false);
 	});
 
-	var terrain_formation_controller = terrain_folder.add(this, 'Terrain_Formation', ['Default', 'Islands', 'Mountains', 'Marsh', 'Water']).name('Terrain Formation');
+	var terrain_formation_controller = terrain_folder.add(this, 'Terrain_Formation', ['Default', 'Islands', 'Mountains', 'Marsh']).name('Terrain Formation');
 
 	terrain_formation_controller.onFinishChange(function(value) {
 		userDefinedColors = false;
 
-		if (gui_controller.Terrain_Formation == 'Default') {
+		if (value == 'Default') {
 			Terrain_Formation = 'Default';
 		} else 
-		if (gui_controller.Terrain_Formation == 'Islands') {
+		if (value == 'Islands') {
 			Terrain_Formation = 'Islands';
 		} else
-		if (gui_controller.Terrain_Formation == 'Water') {
-			Terrain_Formation = 'Water';
-		} else
-		if (gui_controller.Terrain_Formation == 'Mountains') {
+		if (value == 'Mountains') {
 			Terrain_Formation = 'Mountains';
 		} else
-		if (gui_controller.Terrain_Formation == 'Marsh') {
+		if (value == 'Marsh') {
 			Terrain_Formation = 'Marsh';
 		}
 
@@ -526,29 +534,29 @@ function GUI_CONTROLLER() {	////////////////////////////////////////////////////
 	var noise_folder = gui.addFolder('Noise');
 	noise_folder.open();
 
-	var height_dist_controller = noise_folder.add(this, 'Height_Distribution', 0.02, 1.5).name('Height Distribution').listen();
+	this.height_dist_controller = noise_folder.add(this, 'Height_Distribution', 0.02, this.Max_Height_Distribution).name('Height Distribution').listen();
 	
-	height_dist_controller.onFinishChange(function(value) {
+	this.height_dist_controller.onChange(function(value) {
 		heightMult = gui_controller.Height_Distribution;
 		gui_controller.Regenerate(true, false);
 	});
 	
-	var noise_quality_controller = noise_folder.add(this, 'Noise_Quality', 0.5, 8).name('Noise Distribution').listen();
+	this.noise_quality_controller = noise_folder.add(this, 'Noise_Quality', 0.5, this.Max_Noise_Quality).name('Horizontal Distribution').listen();
 	
-	noise_quality_controller.onFinishChange(function(value) {
+	this.noise_quality_controller.onFinishChange(function(value) {
 		noiseQuality = Math.round(gui_controller.Noise_Quality);
-		gui_controller.Regenerate(true, false);
+		gui_controller.Regenerate(true, false, true);
 	});
 	
-	var noise_quality_reset_controller = noise_folder.add(this, 'Reset_Noise').name('Reset Noise Settings');
+	this.noise_quality_reset_controller = noise_folder.add(this, 'Reset_Noise').name('Reset Noise Settings');
 
 
 	var customization_folder = gui.addFolder('Block Colours');
 	customization_folder.open();
-	var grass_color_controller = customization_folder.addColor(terrain, 'grass_color').name('Grass Colour');
-	var sand_color_controller = customization_folder.addColor(terrain, 'sand_color').name('Sand Colour');
-	var water_color_controller = customization_folder.addColor(terrain, 'water_color').name('Water Colour');
-	var reset_colors_controller = customization_folder.add(this, 'Reset_Blocks_Colors').name('Reset Block Colours')
+	var grass_color_controller = customization_folder.addColor(terrain, 'grass_color').name('Grass Colour').listen();
+	var sand_color_controller = customization_folder.addColor(terrain, 'sand_color').name('Sand Colour').listen();
+	var water_color_controller = customization_folder.addColor(terrain, 'water_color').name('Water Colour').listen();
+	var reset_colors_controller = customization_folder.add(this, 'Reset_Blocks_Colors').name('Reset Block Colours').listen();
 
 	grass_color_controller.onFinishChange(function(value) {
 		userDefinedColors = true;
