@@ -19,7 +19,7 @@ function exportGLTF(input) {
   gltfExporter.parse(input, function (result) {
 
     if (result instanceof ArrayBuffer) {
-      
+
       saveArrayBuffer(result, 'scene.glb');
 
     } else {
@@ -31,13 +31,6 @@ function exportGLTF(input) {
     }
 
   }, options);
-
-  // var exporter = new PLYExporter();
-  // exporter.parse( input, function ( result ) {
-
-  //   saveArrayBuffer( result, 'box.ply' );
-
-  // }, { binary: true } );
 
 }
 

@@ -6,14 +6,15 @@ import { exportGLTF } from './export.js';
 
 var grassGeometry, sandGeometry, waterGeometry, grassMesh, sandMesh, waterMesh, h, transform2, scene_download;
 
-grassGeometry = new THREE.Geometry();
-sandGeometry = new THREE.Geometry();
-waterGeometry = new THREE.Geometry();
-transform2 = new THREE.Object3D();
 
 scene_download = new THREE.Scene();
 
 function download() {
+  
+  grassGeometry = new THREE.Geometry();
+  sandGeometry = new THREE.Geometry();
+  waterGeometry = new THREE.Geometry();
+  transform2 = new THREE.Object3D();
 
   for (var z = 0; z < global.worldDepth; z++) {
 
@@ -42,19 +43,39 @@ function download() {
     }
   }
 
-  let grassGeometryBuffer = new THREE.BufferGeometry().fromGeometry(grassGeometry); // buffer geometry reduces file sizes
-  let sandGeometryBuffer = new THREE.BufferGeometry().fromGeometry(sandGeometry);
-  let waterGeometryBuffer = new THREE.BufferGeometry().fromGeometry(waterGeometry);
-
-  grassMesh = new THREE.Mesh(grassGeometryBuffer, new THREE.MeshStandardMaterial({ color: global.terrain.grass_color }));
-  sandMesh = new THREE.Mesh(sandGeometryBuffer, new THREE.MeshStandardMaterial({ color: global.terrain.sand_color }));
-  waterMesh = new THREE.Mesh(waterGeometryBuffer, new THREE.MeshStandardMaterial({ color: global.terrain.water_color }));
+  grassMesh = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(grassGeometry), new THREE.MeshStandardMaterial({ color: global.terrain.grass_color }));
+  sandMesh = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(sandGeometry), new THREE.MeshStandardMaterial({ color: global.terrain.sand_color }));
+  waterMesh = new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(waterGeometry), new THREE.MeshStandardMaterial({ color: global.terrain.water_color }));
   
   scene_download.add(grassMesh);
   scene_download.add(sandMesh);
   scene_download.add(waterMesh);
 
   exportGLTF(scene_download);
+
+  while (scene_download.children.length > 0) {
+    scene_download.remove(scene_download.children[0]); 
+  }
+
+  grassMesh.geometry.dispose();
+  grassMesh.material.dispose();
+  sandMesh.geometry.dispose();
+  sandMesh.material.dispose();
+  waterMesh.geometry.dispose();
+  waterMesh.material.dispose();
+
+  grassGeometry.dispose();
+  sandGeometry.dispose();
+  waterGeometry.dispose();
+
+  scene_download.remove(grassMesh);
+  scene_download.remove(sandMesh);
+  scene_download.remove(waterMesh);
+
+  scene_download.dispose();
+
+  THREE.Cache.clear();
+  console.log('disposed');
 
 }
 

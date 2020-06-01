@@ -13,7 +13,7 @@ function render() {
 
 	requestAnimationFrame(render);
 
-	// stats.update();
+	global.stats.update();
 	global.controls.update(clock.getDelta());
 	global.renderer.render(global.scene, global.camera);
 }

@@ -34,9 +34,10 @@ function generateHeight(width, height, sameSeed, customSeed) {
 	}
 
 	if (global.Terrain_Formation == 'Default') {
-		console.log('Terrain Formation: Default')
+		// console.log('Terrain Formation: Default')
 
 		if (global.gui_controller != undefined) {
+			global.gui_controller.Min_Height_Distribution = 0.02;
 			global.gui_controller.Max_Height_Distribution = 1.5;
 			global.gui_controller.Max_Noise_Quality = 5;
 		}
@@ -59,11 +60,11 @@ function generateHeight(width, height, sameSeed, customSeed) {
 		}
 	} else 
 	if (global.Terrain_Formation == 'Islands') {
-		console.log('Terrain Formation: Islands')
+		// console.log('Terrain Formation: Islands')
 
 		if (global.gui_controller != undefined) {
-			console.log('fuck this')
-			global.gui_controller.Max_Height_Distribution = 1;
+			global.gui_controller.Min_Height_Distribution = 0.2;
+			global.gui_controller.Max_Height_Distribution = 1.5;
 			global.gui_controller.Max_Noise_Quality = 2.5;
 		}
 
@@ -92,7 +93,6 @@ function generateHeight(width, height, sameSeed, customSeed) {
 				let distanceY = ((global.worldDepth / 2) - z) * ((global.worldDepth / 2) - z)
 
 				var distanceToCenter = Math.sqrt(distanceX + distanceY);
-				// distanceToCenter = distanceToCenter / global.worldWidth;
 		
 				data[index] -= distanceToCenter / 2;
 
@@ -102,11 +102,12 @@ function generateHeight(width, height, sameSeed, customSeed) {
 	} else 
 
 	if (global.Terrain_Formation == 'Mountains') {
-		console.log('Terrain Formation: Mountains');
+		// console.log('Terrain Formation: Mountains');
 		
 		if (global.gui_controller != undefined) {
+			global.gui_controller.Min_Height_Distribution = 0.02;
 			global.gui_controller.Max_Height_Distribution = 0.5;
-			global.gui_controller.Max_Noise_Quality = 1;
+			global.gui_controller.Max_Noise_Quality = 2;
 		}
 
 		for (var j = 0; j < 4; j++) {
@@ -129,7 +130,13 @@ function generateHeight(width, height, sameSeed, customSeed) {
 	} else
 
 	if (global.Terrain_Formation == 'Marsh') {
-		console.log('Terrain Formation: Marsh');
+		// console.log('Terrain Formation: Marsh');
+
+		if (global.gui_controller != undefined) {
+			global.gui_controller.Min_Height_Distribution = 0.02;
+			global.gui_controller.Max_Height_Distribution = 1.5;
+			global.gui_controller.Max_Noise_Quality = 5;
+		}
 
 		for (var j = 0; j < 4; j++) {
 	
@@ -150,28 +157,6 @@ function generateHeight(width, height, sameSeed, customSeed) {
 		}
 	}
 	
-	return data;
-}
-
-
-function randomHeight(width, height) {
-	var data = []
-	var size = width * height;
-	var z = Math.random() * 100;
-
-	for (var j = 0; j < 4; j++) {
-
-		if (j === 0) for (var i = 0; i < size; i++) data[i] = 0;
-
-		for (var i = 0; i < size; i++) {
-
-			var x = i % width
-			var y = (i / width) | 0;
-			data[i] += Math.random() * -10;
-		}
-
-	}
-
 	return data;
 }
 
