@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed&display=swap" rel="stylesheet"> 
+    
+    <title> Generative Terrain </title>
+
+    <style>
+
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
+      canvas { 
+        display: block; 
+      }
+
+      #threejsDiv {
+        position: absolute;
+        display: block;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+      #startingScreen {
+        position: absolute;
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.95);
+        z-index: 100000;
+        cursor: pointer;
+      }
+
+      #heading {
+        font-family: 'Barlow Condensed', sans-serif;
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        font-size: 24px;
+        color: white;
+        transform: translate(-50%,-50%);
+        -ms-transform: translate(-50%,-50%);
+      }
+
+      #text {
+        font-family: 'Barlow Condensed', sans-serif;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 18px;
+        color: white;
+        transform: translate(-50%,-50%);
+        -ms-transform: translate(-50%,-50%);
+        text-align: center;
+        line-height: 28px;        
+      }
+
+      a {
+        color: orange;
+      }
+
+    </style>
+
+</head>
+
+<body>
+
+  <div id="threejsDiv"></div>
+  <div id="startingScreen" onclick="hidePanel()">
+    <div id="heading"> Procedural Terrain Generator </div>
+
+    <div id="text"> <br> <br> Everything you see is procedurally generated using <a href="https://mrl.nyu.edu/~perlin/paper445.pdf" target="_blank"> Improved Perlin Noise </a> and rendered with <a href="https://threejs.org/" target="_blank"> Three.js </a> and <a href="https://www.opengl.org/" target="_blank"> OpenGL </a>. <br> <br>
+
+                    To generate new terrain click <b>Regenerate</b> at the top of the options panel. <br> <br>
+
+                    To <b>Orbit</b> use Left Mouse Button. <br>
+                    To <b>Pan</b> use Right Mouse Button. <br>
+                    To <b>Zoom</b> use Scroll Wheel. <br> <br>                  
+
+                    Terrain seeds can be saved and reused, and the entire scene can be downloaded as a group of 3D models. <br> <br>
+
+                    <b>Width/Depth</b> = Defines the dimensions of the terrain generated. <br>
+                    <b>Terrain Formation</b> = Changes the generation algorithm to replicate different types of land formation/biomes. <br>
+                    <b>Water Type</b> = Basic water uses a simple cubemap reflection, whereas Advanced water uses a vertex shader to simulate ripples and generate real-time reflections (GPU-intensive). <br>
+                    <b>Height/Noise Distribution</b> = Changes how the noise output is vertically and horizontally distributed. Can be used to create very different terrain structures. <br>
+                    <b>Block/Light Colours</b> = Allows the colour of each block type and both lights to be changed to any hex colour. <br>
+
+    </div>
+    
+  </div>
+    
+    <script src="main.js" type='module'></script>
+
+  </body>
+
+  <script>
+
+    function hidePanel() {
+      document.getElementById('startingScreen').style.display = "none";
+    }
+
+  </script>
+
+</html>
