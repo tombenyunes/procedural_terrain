@@ -1,3 +1,4 @@
+console.log('MAIN.JS START');
 import * as THREE from './build/three.module.js';
 import Stats from './modules/libs/stats.module.js';
 import { GUI } from './modules/libs/dat.gui.module.js';
